@@ -1,0 +1,11 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build and push image which app build runs on
+      run: ./build.sh ${{ secrets.ID_RSA_CONTENTS_BASE64 }} ${{ secrets.DOCKER_CONFIG_CONTENTS_BASE64 }}
