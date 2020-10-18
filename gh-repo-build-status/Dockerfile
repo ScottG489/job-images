@@ -4,9 +4,12 @@ RUN apt-get update && \
     DEBIAN_FRONTEND="noninteractive" \
     TZ="America/New_York" \
     apt install -y \
+    npm \
     nodejs
+
+RUN npm install ts-node --global
 
 COPY node_modules /node_modules
 COPY index.ts /index.ts
 
-CMD ["node", "index.ts"]
+CMD ["ts-node", "index.ts"]

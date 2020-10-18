@@ -1,23 +1,51 @@
-const { Octokit } = require("@octokit/rest");
-var fs = require('fs');
+import {Endpoints} from "@octokit/types";
+import {Octokit} from "@octokit/rest";
+import {readFileSync} from "fs";
 
 const secretsFile = "/run/build/secrets/secrets";
-var secrets = JSON.parse(fs.readFileSync(secretsFile, 'utf8'));
+const secrets = JSON.parse(readFileSync(secretsFile, 'utf8'));
 const username = secrets.USERNAME
 const githubToken = secrets.GITHUB_TOKEN
 
 const octokit = new Octokit({
-    auth: secrets.GITHUB_TOKEN
+    auth: githubToken
 });
 
+type ListUserReposParameters = Endpoints["GET /user/repos"]["parameters"];
+type ListUserReposResponse = Endpoints["GET /user/repos"]["response"];
 
-async function lol() {
-    return await octokit.repos.listForUser({ username, });
+type ListUserRepoActionsParameters = Endpoints["GET /repos/:owner/:repo/actions/workflows"]["parameters"];
+type ListUserRepoActionsResponse = Endpoints["GET /repos/:owner/:repo/actions/workflows"]["response"];
+
+async function getRepoNames() {
+    let userReposParams: ListUserReposParameters = {
+        type: "owner",
+        sort: "updated"
+    }
+    const userRepos = await octokit.repos.listForAuthenticatedUser(userReposParams)
+
+    return userRepos.data.map(repo => {
+        return repo.name
+    })
+}
+
+async function getWorkflowBadgeUrl(repoName: string) {
+    let userRepoActionParams: ListUserRepoActionsParameters = {
+        owner: username,
+        repo: repoName
+    }
+    const repoWorkflows = await octokit.actions.listRepoWorkflows(userRepoActionParams)
+    return repoWorkflows.data.workflows
+        .map(workflow => {
+            return workflow.badge_url
+        })
 }
 
 (async () => {
-    var text = await lol();
-    console.log(JSON.stringify(text, null, 2));
+    const repoNames = await getRepoNames();
+    const badgeUrls = await Promise.all(repoNames.map(getWorkflowBadgeUrl))
+
+    console.log(JSON.stringify(badgeUrls, null, 2));
 })().catch(e => {
     console.log("Fail")
     console.log(e);
