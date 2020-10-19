@@ -43,7 +43,12 @@ async function getWorkflowBadgeUrl(repoName: string) {
 
 (async () => {
     const repoNames = await getRepoNames();
-    const badgeUrls = await Promise.all(repoNames.map(getWorkflowBadgeUrl))
+    const badgeUrls = (await Promise.all<string[]>(repoNames.map(getWorkflowBadgeUrl)))
+        .filter(workflowBadges => {
+            return Array.isArray(workflowBadges) && workflowBadges.length
+        }).map(f => {
+            return f[0]
+        })
 
     console.log(JSON.stringify(badgeUrls, null, 2));
 })().catch(e => {
