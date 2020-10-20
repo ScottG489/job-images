@@ -10,6 +10,6 @@ RUN apt-get update && \
 RUN npm install ts-node --global
 
 COPY node_modules /node_modules
-COPY index.ts /index.ts
+COPY src /src
 
-CMD ["ts-node", "index.ts"]
+CMD ["ts-node", "src/index.ts"]
