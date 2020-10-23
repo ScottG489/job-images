@@ -10,51 +10,41 @@ puppeteer.use(require('puppeteer-extra-plugin-repl')())
 let authenticator = require('authenticator');
 
 
-// const chromeLauncher = require('chrome-launcher');
-// const axios = require('axios');
-// const Xvfb = require('xvfb');
-
 const secretsFile = "/run/build/secrets/secrets";
 const secrets = JSON.parse(fs.readFileSync(secretsFile, 'utf8'));
 const username = secrets.USERNAME;
 const password = secrets.PASSWORD;
 const mfaToken = secrets.MFA_TOKEN;
 
-puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox']}).then(async browser => {
-// (async () => {
-//     const xvfb = new Xvfb();
-//     console.log('starting xvfb')
-    // xvfb.startSync();
-//    const chromeConfig = {
-//    	chromePath: "/usr/bin/google-chrome-stable"
-//    }
-//     const chromeConfig = {
-//         chromePath: "./node_modules/puppeteer/.local-chromium/linux-800071/chrome-linux/chrome"
-//     }
+// const launchArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--proxy-server=zproxy.lum-superproxy.io:22225']
+const launchArgs = ['--no-sandbox', '--disable-setuid-sandbox']
+puppeteer.launch({ headless: true, args: launchArgs}).then(async browser => {
+    console.log('launched')
 
-    // console.log('launching chrome')
-    // const chrome = await chromeLauncher.launch(chromeConfig);
-    // console.log('getting response')
-    // const response = await axios.get(`http://localhost:${chrome.port}/json/version`);
-    // const {webSocketDebuggerUrl} = response.data;
-    // console.log('connecting')
-    // const browser = await puppeteer.connect({browserWSEndpoint: webSocketDebuggerUrl});
-    console.log('connected')
-
+    // Set up browser tunnel
     const browserCtx = await browser.createIncognitoBrowserContext();
-    // const tunnel = await devtools.createTunnel(browser)
-    // console.log(tunnel.url)
+    const tunnel = await devtools.createTunnel(browser)
+    console.log(tunnel.url)
 
     const page = await browserCtx.newPage();
+
+    // Set up luminati proxy
+    await page.authenticate({
+        username: '',
+        password: ''
+    });
+    // await page.goto('http://lumtest.com/myip.json');
+    // await page.repl()
+    // await browser.repl()
+    // await browser.close();
+    // process.exit()
+
 
     // TODO: URL shortcut
     // https://takeout.google.com/takeout/custom/mymaps,local_actions,location_history
     await page.goto('https://takeout.google.com/settings/takeout', {waitUntil: 'networkidle2'});
     // await page.waitFor(20000)
-    // console.log("FINISHED WAITING")
-
-    // await page.repl()
-    // await browser.repl()
+    console.log("FINISHED WAITING")
 
     console.log('waiting for email input')
     const emailInputSelector = 'input[type=email]'
@@ -64,10 +54,7 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sand
     await page.type(emailInputSelector, username, {delay: 20})
 
     // Submit email
-    // const passwordSelector = 'input[type=password]'
-    // page.waitForNavigation()
-    // page.waitForSelector(passwordSelector, {visible: true}),
-    page.click('div[data-primary-action-label="Next"] button'),
+    page.click('div[data-primary-action-label="Next"] button')
     console.log('submitted email')
 
     console.log('waiting for pass input')
@@ -83,7 +70,7 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sand
     try {
         console.log('waiting for mfa chooser button')
         const mfaChooserSelector = 'div[data-primary-action-label=""] button'
-        await page.waitForSelector(mfaChooserSelector, {visible: true})
+        await page.waitForSelector(mfaChooserSelector, {visible: true, timeout: 10000})
         await page.waitForTimeout(1000)
         console.log('found mfa chooser button')
         // Choose different MFA method
@@ -211,21 +198,56 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sand
     page.click('c-wiz[data-state="1"] div[role="tabpanel"] button')
     console.log('submitted create export request')
 
+    // await page.repl()
+    // await browser.repl()
+
+    // TODO: It appears that in aws (or behind even attemted residential proxies) google doesn't allow for
+    // TODO:    token authentication and is thus not possible to be automated. The only work around here is
+    // TODO:    to figure out why google is becoming suspicious of this activity and work around it. Another
+    // TODO:    possible option is to leave a persistent session open. Once a session has successfully submitted
+    // TODO:    an export the subsequent exports don't seem to be suspect by google and submit without requiring
+    // TODO:    verification.
     try {
-        console.log('waiting for pass input')
-        await page.waitForSelector(passwordSelector, {visible: true})
-        console.log('found pass input')
-        // Type in password
-        await page.type(passwordSelector, password, {delay: 20})
-        // Submit password
-        page.click('div[data-primary-action-label="Next"] button')
-        console.log('submitted pass')
+        console.log('waiting for mfa chooser button')
+        const verifyMfaChooserSelector = 'div[data-primary-action-label="Yes"] div div:nth-child(2) button'
+        await page.waitForSelector(verifyMfaChooserSelector, {visible: true, timeout: 10000})
+        await page.waitForTimeout(1000)
+        console.log('found mfa chooser button')
+        // Choose different MFA method
+        page.click(verifyMfaChooserSelector)
+        console.log('submitted mfa chooser')
+
+        console.log('waiting for mfa method list')
+        await page.waitForTimeout(1000)
+        const mfaMethodSelector = 'div[data-form-action-uri] li div[data-challengetype="6"]'
+        await page.waitForSelector(mfaMethodSelector, {visible: true})
+        // TODO: Hack because for some reason the above selector resolves before the element is clickable
+        await page.waitForTimeout(1000)
+        console.log('found found mfa method list')
+        // Select Google Authenticator MFA method
+        page.click(mfaMethodSelector)
+        console.log('submitted mfa method')
+
+        console.log('waiting for mfa token input')
+        const mfaTokenInputSelector = 'input[aria-label="Enter code"]'
+        await page.waitForSelector(mfaTokenInputSelector, {visible: true})
+        console.log('found mfa token input')
+        // Generate token and enter it into input field
+        const formattedToken = authenticator.generateToken(mfaToken);
+        await page.type(mfaTokenInputSelector, formattedToken, {delay: 20})
+        // Submit token
+        const mfaTokenButtonSelector = 'div[data-primary-action-label="Next"] button'
+        await page.waitForSelector(mfaTokenButtonSelector, {visible: true})
+        await page.waitForTimeout(1000)
+        page.click(mfaTokenButtonSelector)
+        console.log('submitted mfa token')
     } catch (e) {
         console.log(e)
         console.log("skipping to export validation")
     }
 
-    console.log("validation export...")
+
+    console.log("validating export...")
     await page.waitForTimeout(3000)
     await page.waitForSelector('title')
     await page.waitForTimeout(1000)
