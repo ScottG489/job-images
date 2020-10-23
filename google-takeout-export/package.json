@@ -1,0 +1,31 @@
+{
+  "name": "foo",
+  "version": "1.0.0",
+  "description": "hello world project",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "node index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^14.11.10",
+    "authenticator": "^1.1.5",
+    "puppeteer": "^5.3.1",
+    "puppeteer-extra": "^3.1.15",
+    "puppeteer-extra-plugin-adblocker": "^2.11.6",
+    "puppeteer-extra-plugin-anonymize-ua": "^2.2.14",
+    "puppeteer-extra-plugin-devtools": "^2.2.14",
+    "puppeteer-extra-plugin-repl": "^2.2.8",
+    "puppeteer-extra-plugin-stealth": "^2.6.2",
+    "puppeteer-extra-plugin-user-data-dir": "^2.2.7",
+    "puppeteer-extra-plugin-user-preferences": "^2.2.7",
+    "typescript": "^4.0.3",
+    "axios": "^0.20.0",
+    "chrome-launcher": "^0.13.4"
+  },
+  "devDependencies": {
+    "ts-node": "^9.0.0"
+  }
+}
