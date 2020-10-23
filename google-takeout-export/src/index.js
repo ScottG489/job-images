@@ -77,7 +77,6 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sand
     // Type in password
     await page.type(passwordSelector, password, {delay: 20})
     // Submit password
-    // Submit email
     page.click('div[data-primary-action-label="Next"] button')
     console.log('submitted pass')
 
@@ -212,6 +211,21 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sand
     page.click('c-wiz[data-state="1"] div[role="tabpanel"] button')
     console.log('submitted create export request')
 
+    try {
+        console.log('waiting for pass input')
+        await page.waitForSelector(passwordSelector, {visible: true})
+        console.log('found pass input')
+        // Type in password
+        await page.type(passwordSelector, password, {delay: 20})
+        // Submit password
+        page.click('div[data-primary-action-label="Next"] button')
+        console.log('submitted pass')
+    } catch (e) {
+        console.log(e)
+        console.log("skipping to export validation")
+    }
+
+    console.log("validation export...")
     await page.waitForTimeout(3000)
     await page.waitForSelector('title')
     await page.waitForTimeout(1000)
