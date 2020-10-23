@@ -11,3 +11,14 @@ declare -r DOCKER_CONFIG_CONTENTS_BASE64=$2
 ./gh-repo-build-status/build.sh \
   "$ID_RSA_CONTENTS_BASE64" \
   "$DOCKER_CONFIG_CONTENTS_BASE64"
+
+./google-takeout-export/infra/build/build.sh \
+  "$ID_RSA_CONTENTS_BASE64" \
+  "$DOCKER_CONFIG_CONTENTS_BASE64" \
+  'git@github.com:ScottG489/job-images.git' \
+  'google-takeout-export/infra/build' \
+  'scottg489/google-takeout-export-job-build:latest'
+
+./google-takeout-export/build.sh \
+  "$ID_RSA_CONTENTS_BASE64" \
+  "$DOCKER_CONFIG_CONTENTS_BASE64"
