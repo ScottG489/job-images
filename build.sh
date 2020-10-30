@@ -12,6 +12,7 @@ declare -r DOCKER_CONFIG_CONTENTS_BASE64=$2
   "$ID_RSA_CONTENTS_BASE64" \
   "$DOCKER_CONFIG_CONTENTS_BASE64"
 
+
 ./google-takeout-export/infra/build/build.sh \
   "$ID_RSA_CONTENTS_BASE64" \
   "$DOCKER_CONFIG_CONTENTS_BASE64" \
@@ -20,5 +21,17 @@ declare -r DOCKER_CONFIG_CONTENTS_BASE64=$2
   'scottg489/google-takeout-export-job-build:latest'
 
 ./google-takeout-export/build.sh \
+  "$ID_RSA_CONTENTS_BASE64" \
+  "$DOCKER_CONFIG_CONTENTS_BASE64"
+
+
+./google-takeout-download/infra/build/build.sh \
+  "$ID_RSA_CONTENTS_BASE64" \
+  "$DOCKER_CONFIG_CONTENTS_BASE64" \
+  'git@github.com:ScottG489/job-images.git' \
+  'google-takeout-download/infra/build' \
+  'scottg489/google-takeout-download-job-build:latest'
+
+./google-takeout-download/build.sh \
   "$ID_RSA_CONTENTS_BASE64" \
   "$DOCKER_CONFIG_CONTENTS_BASE64"
