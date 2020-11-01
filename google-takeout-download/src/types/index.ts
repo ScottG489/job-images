@@ -1,13 +1,11 @@
-export interface FileMetadata {
-    Key: string;
-    LastModified: string;
-    ETag: string;
-    Size: number;
-    StorageClass: string;
+export interface FileMeta {
+    id: string;
+    name: string;
 }
 
-export interface FileMetadataAbbr {
-    key: string;
-    createdDateTime: Date;
+export interface SecretsConfig {
+    clientId: string;
+    clientSecret: string;
+    redirectUrl: string;
+    refreshToken: string;
 }
-

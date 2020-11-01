@@ -12,6 +12,8 @@
   "dependencies": {
     "aws-sdk": "^2.782.0",
     "date-and-time": "^0.14.1",
+    "googleapis": "^62.0.0",
+    "nullthrows": "^1.1.1",
     "typescript": "^4.0.3"
   },
   "devDependencies": {

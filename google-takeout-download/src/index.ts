@@ -1,58 +1,85 @@
-import date from 'date-and-time'
-import S3 from 'aws-sdk/clients/s3'
-import {readFileSync} from "fs";
-import {FileMetadata, FileMetadataAbbr} from "./types";
+import {drive_v3, google} from 'googleapis';
+
+import fs from "fs";
+import {FileMeta, SecretsConfig} from "./types";
+import Drive = drive_v3.Drive;
+import Schema$File = drive_v3.Schema$File;
+import nullthrows from "nullthrows";
+import {Readable} from "stream";
 
 const secretsFile = "/run/build/secrets/secrets";
-const secrets = JSON.parse(readFileSync(secretsFile, 'utf8'));
-const awsAccessKeyId = secrets.ACCESS_KEY_ID
-const awsSecretAccessKey = secrets.SECRET_ACCESS_KEY
+const secrets: SecretsConfig = JSON.parse(fs.readFileSync(secretsFile, 'utf8'));
 
-const S3_TAKEOUT_BUCKET_NAME = 'gdrive-takeout';
+const drive: Drive = getDriveClient(secrets);
+
+const downloadDestinationDir = '/tmp';
 
 (async () => {
-    const s3: S3 = new S3({
-        credentials: {
-            accessKeyId: awsAccessKeyId,
-            secretAccessKey: awsSecretAccessKey
-        }
-    })
+    if (!fs.existsSync(downloadDestinationDir)) {
+        throw new Error('Download destination directory does not exist')
+    }
 
-    const gdriveTakeoutList: any = await s3.listObjectsV2({
-            Bucket: S3_TAKEOUT_BUCKET_NAME
-        }
-    ).promise()
+    // Get all takeout files ordered by createTime (latest being last)
+    const fileMetas: FileMeta[] = await getOrderedTakeoutFilesResponse()
 
-    const latestFileName = gdriveTakeoutList.Contents.map((fileMetadata: FileMetadata) => {
-        return {
-            key: fileMetadata.Key,
-            createdDateTime: parseDateFrom(fileMetadata.Key)
-        }
-    })
-        .sort(fileMetadataAbbrComparator)
-        .pop().key
+    // Get the latest file from list
+    const latestTakeoutFileMeta: FileMeta = getLatestTakeoutFileMeta(fileMetas)
 
-    const options = {
-        Bucket: S3_TAKEOUT_BUCKET_NAME,
-        Key: latestFileName,
-    };
+    // Get latest takeout file
+    const latestTakeoutFile: Readable = await getLatestTakeoutFile(latestTakeoutFileMeta.id)
 
-    let resp = await s3.getObject(options).promise();
-    console.log(resp.Body?.toString('base64'))
-
-    // let fileStream = s3.getObject(options).createReadStream();
-    // let writeStream = fs.createWriteStream(latestFileName);
-    // fileStream.pipe(writeStream);
+    // Write file to disk
+    const dest = fs.createWriteStream(
+        `${downloadDestinationDir}/${latestTakeoutFileMeta.name}.tgz`);
+    await latestTakeoutFile.pipe(dest)
 })().catch(e => {
     console.log("Fail")
     console.log(e);
 });
 
-function parseDateFrom(fileName: string): Date {
-    const createdDateTime = fileName.split('-')[1]
-    return date.parse(createdDateTime, 'YYYYMMDDTHHmmss ', true);
+async function getOrderedTakeoutFilesResponse(): Promise<FileMeta[]> {
+    const listResponse = await drive.files.list({
+        spaces: 'drive',
+        fields: '*',
+        orderBy: "createdTime",
+        q: 'name contains "takeout" ' +
+            'and mimeType != "application/vnd.google-apps.folder" ' +
+            'and trashed = false'
+    })
+    const files = nullthrows(listResponse.data.files, 'No takeout files found')
+
+    return files.map(toFileMeta);
 }
 
-function fileMetadataAbbrComparator(file1: FileMetadataAbbr, file2: FileMetadataAbbr): number {
-    return file1.createdDateTime.getTime() - file2.createdDateTime.getTime()
+function getLatestTakeoutFileMeta(fileMetadata: FileMeta[]): FileMeta {
+    const file = fileMetadata.pop()
+    return nullthrows(file, 'Unable to determine latest takeout file id')
+}
+
+async function getLatestTakeoutFile(latestTakeoutFileId: string) {
+    const resp = await drive.files.get({
+        fileId: latestTakeoutFileId,
+        alt: 'media'
+    }, {responseType: 'stream'})
+
+    return resp.data as Readable
+}
+
+function toFileMeta(file: Schema$File): FileMeta {
+    const fileId = nullthrows(file.id, 'File doesn\'t have id')
+    const name = nullthrows(file.name, 'File doesn\'t have name')
+    return {
+        id: fileId,
+        name: name
+    }
+}
+
+function getDriveClient(secrets: SecretsConfig): Drive {
+    const auth = new google.auth.OAuth2(
+        secrets.clientId,
+        secrets.clientSecret,
+        secrets.redirectUrl)
+    auth.setCredentials({refresh_token: secrets.refreshToken})
+
+    return google.drive({version: 'v3', auth});
 }
