@@ -20,21 +20,29 @@ const downloadDestinationDir = '/tmp';
     }
 
     // Get all takeout files ordered by createTime (latest being last)
+    console.log("Finding takeout files")
     const fileMetas: FileMeta[] = await getOrderedTakeoutFilesResponse()
+    if (fileMetas.length === 0) {
+        console.log('No takeout files found')
+        process.exit(0)
+    }
 
     // Get the latest file from list
     const latestTakeoutFileMeta: FileMeta = getLatestTakeoutFileMeta(fileMetas)
 
     // Get latest takeout file
+    console.log(`Starting download of takeout file: '${latestTakeoutFileMeta.name}'`)
     const latestTakeoutFile: Readable = await getLatestTakeoutFile(latestTakeoutFileMeta.id)
 
     // Write file to disk
-    const dest = fs.createWriteStream(
-        `${downloadDestinationDir}/${latestTakeoutFileMeta.name}.tgz`);
-    await latestTakeoutFile.pipe(dest)
+    const fileDest = `${downloadDestinationDir}/${latestTakeoutFileMeta.name}.tgz`
+    console.log(`Saving to disk at: ${fileDest}`)
+    const dest = fs.createWriteStream(fileDest);
+    latestTakeoutFile.pipe(dest)
 })().catch(e => {
     console.log("Fail")
     console.log(e);
+    process.exit(1)
 });
 
 async function getOrderedTakeoutFilesResponse(): Promise<FileMeta[]> {
