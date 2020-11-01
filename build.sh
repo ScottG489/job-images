@@ -25,13 +25,13 @@ declare -r DOCKER_CONFIG_CONTENTS_BASE64=$2
   "$DOCKER_CONFIG_CONTENTS_BASE64"
 
 
-./google-takeout-download/infra/build/build.sh \
+./google-takeout-gdrive-to-s3/infra/build/build.sh \
   "$ID_RSA_CONTENTS_BASE64" \
   "$DOCKER_CONFIG_CONTENTS_BASE64" \
   'git@github.com:ScottG489/job-images.git' \
-  'google-takeout-download/infra/build' \
-  'scottg489/google-takeout-download-job-build:latest'
+  'google-takeout-gdrive-to-s3/infra/build' \
+  'scottg489/google-takeout-gdrive-to-s3-job-build:latest'
 
-./google-takeout-download/build.sh \
+./google-takeout-gdrive-to-s3/build.sh \
   "$ID_RSA_CONTENTS_BASE64" \
   "$DOCKER_CONFIG_CONTENTS_BASE64"
