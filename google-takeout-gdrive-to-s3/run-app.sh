@@ -10,6 +10,9 @@ set -x
 # TODO:   https://github.com/TypeStrong/ts-node/issues/754
 ts-node --transpile-only src/index.ts
 
-aws s3 sync /tmp/takeout s3://gdrive-takeout
+tar xvf /tmp/takeout/takeout-*.tgz --directory /tmp/takeout
+rm --verbose /tmp/takeout/takeout-*.tgz
+
+aws s3 sync /tmp/takeout/Takeout s3://gdrive-takeout/Takeout
 
 ts-node --transpile-only src/index.ts delete
