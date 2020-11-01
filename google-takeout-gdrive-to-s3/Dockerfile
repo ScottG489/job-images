@@ -5,12 +5,19 @@ RUN apt-get update && \
     TZ="America/New_York" \
     apt install -y \
     npm \
-    nodejs
+    nodejs \
+    awscli \
+    jq
 
 RUN npm install ts-node --global
+
+RUN mkdir /root/.aws
+
+RUN mkdir /tmp/takeout
 
 COPY node_modules /node_modules
 COPY tsconfig.json /tsconfig.json
 COPY src /src
+COPY run-app.sh /run-app.sh
 
-CMD ["ts-node", "src/index.ts"]
+CMD ["./run-app.sh"]

@@ -4,8 +4,9 @@ export interface FileMeta {
 }
 
 export interface SecretsConfig {
-    clientId: string;
-    clientSecret: string;
-    redirectUrl: string;
-    refreshToken: string;
+    CLIENT_ID: string;
+    CLIENT_SECRET: string;
+    REDIRECT_URL: string;
+    REFRESH_TOKEN: string;
+    AWS_CREDENTIALS_FILE_BASE64: string;
 }

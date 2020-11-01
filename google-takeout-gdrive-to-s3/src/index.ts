@@ -12,7 +12,7 @@ const secrets: SecretsConfig = JSON.parse(fs.readFileSync(secretsFile, 'utf8'));
 
 const drive: Drive = getDriveClient(secrets);
 
-const downloadDestinationDir = '/tmp';
+const downloadDestinationDir = '/tmp/takeout';
 
 (async () => {
     if (!fs.existsSync(downloadDestinationDir)) {
@@ -84,10 +84,10 @@ function toFileMeta(file: Schema$File): FileMeta {
 
 function getDriveClient(secrets: SecretsConfig): Drive {
     const auth = new google.auth.OAuth2(
-        secrets.clientId,
-        secrets.clientSecret,
-        secrets.redirectUrl)
-    auth.setCredentials({refresh_token: secrets.refreshToken})
+        secrets.CLIENT_ID,
+        secrets.CLIENT_SECRET,
+        secrets.REDIRECT_URL)
+    auth.setCredentials({refresh_token: secrets.REFRESH_TOKEN})
 
     return google.drive({version: 'v3', auth});
 }
