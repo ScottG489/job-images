@@ -35,7 +35,7 @@ const downloadDestinationDir = '/tmp/takeout';
     const latestTakeoutFile: Readable = await getLatestTakeoutFile(latestTakeoutFileMeta.id)
 
     // Write file to disk
-    const fileDest = `${downloadDestinationDir}/${latestTakeoutFileMeta.name}.tgz`
+    const fileDest = `${downloadDestinationDir}/${latestTakeoutFileMeta.name}`
     console.log(`Saving to disk at: ${fileDest}`)
     const dest = fs.createWriteStream(fileDest);
     latestTakeoutFile.pipe(dest)
