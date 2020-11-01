@@ -11,3 +11,5 @@ set -x
 ts-node --transpile-only src/index.ts
 
 aws s3 sync /tmp/takeout s3://gdrive-takeout
+
+ts-node --transpile-only src/index.ts delete

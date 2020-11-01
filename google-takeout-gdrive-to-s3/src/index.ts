@@ -7,6 +7,8 @@ import Schema$File = drive_v3.Schema$File;
 import nullthrows from "nullthrows";
 import {Readable} from "stream";
 
+const ACTION = process.argv[2]
+
 const secretsFile = "/run/build/secrets/secrets";
 const secrets: SecretsConfig = JSON.parse(fs.readFileSync(secretsFile, 'utf8'));
 
@@ -30,6 +32,19 @@ const downloadDestinationDir = '/tmp/takeout';
     // Get the latest file from list
     const latestTakeoutFileMeta: FileMeta = getLatestTakeoutFileMeta(fileMetas)
 
+    if (ACTION === 'delete') {
+        console.log(`Deleting file from drive: ${latestTakeoutFileMeta.name}`)
+        await deleteFromDrive(latestTakeoutFileMeta);
+    } else {
+        await download(latestTakeoutFileMeta);
+    }
+})().catch(e => {
+    console.log("Fail")
+    console.log(e);
+    process.exit(1)
+});
+
+async function download(latestTakeoutFileMeta: FileMeta) {
     // Get latest takeout file
     console.log(`Starting download of takeout file: '${latestTakeoutFileMeta.name}'`)
     const latestTakeoutFile: Readable = await getLatestTakeoutFile(latestTakeoutFileMeta.id)
@@ -39,11 +54,13 @@ const downloadDestinationDir = '/tmp/takeout';
     console.log(`Saving to disk at: ${fileDest}`)
     const dest = fs.createWriteStream(fileDest);
     latestTakeoutFile.pipe(dest)
-})().catch(e => {
-    console.log("Fail")
-    console.log(e);
-    process.exit(1)
-});
+}
+
+async function deleteFromDrive(latestTakeoutFileMeta: FileMeta) {
+    await drive.files.delete({
+        fileId: latestTakeoutFileMeta.id
+    })
+}
 
 async function getOrderedTakeoutFilesResponse(): Promise<FileMeta[]> {
     const listResponse = await drive.files.list({
