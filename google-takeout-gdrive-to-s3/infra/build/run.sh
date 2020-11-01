@@ -9,7 +9,7 @@ set -x
 
 # These are prefixed with an _ because they have global scope and the build_function lib may have overlap
 declare -r _PROJECT_NAME='job-images'
-declare -r _JOB_NAME='google-takeout-download'
+declare -r _JOB_NAME='google-takeout-gdrive-to-s3'
 declare -r _GIT_REPO='git@github.com:ScottG489/job-images.git'
 # Used for the domain name but also the s3 bucket (AWS requires them to be the same)
 

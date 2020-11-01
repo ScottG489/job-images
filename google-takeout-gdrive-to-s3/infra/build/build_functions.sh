@@ -2,7 +2,7 @@
 set -e
 
 get_git_root_dir() {
-  echo -n "$(git rev-parse --show-toplevel)/google-takeout-download"
+  echo -n "$(git rev-parse --show-toplevel)/google-takeout-gdrive-to-s3"
 }
 
 setup_credentials() {

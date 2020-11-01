@@ -1,5 +1,5 @@
 {
-  "name": "google-takeout-download",
+  "name": "google-takeout-gdrive-to-s3",
   "version": "1.0.0",
   "description": "Download Google Takeout data from Google Drive",
   "main": "index.js",
