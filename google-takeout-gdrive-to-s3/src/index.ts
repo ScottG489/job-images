@@ -24,10 +24,6 @@ const downloadDestinationDir = '/tmp/takeout';
     // Get all takeout files ordered by createTime (latest being last)
     console.log("Finding takeout files")
     const fileMetas: FileMeta[] = await getOrderedTakeoutFilesResponse()
-    if (fileMetas.length === 0) {
-        console.log('No takeout files found')
-        process.exit(0)
-    }
 
     // Get the latest file from list
     const latestTakeoutFileMeta: FileMeta = getLatestTakeoutFileMeta(fileMetas)
@@ -72,6 +68,7 @@ async function getOrderedTakeoutFilesResponse(): Promise<FileMeta[]> {
             'and trashed = false'
     })
     const files = nullthrows(listResponse.data.files, 'No takeout files found')
+    if (files.length === 0) { throw new Error('No takeout files found') }
 
     return files.map(toFileMeta);
 }
