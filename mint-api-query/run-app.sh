@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
-
 set +x
+
 #readonly MINT_USERNAME=$(echo -n $1 | jq -r .MINT_USERNAME)
 #readonly MINT_PASSWORD=$(echo -n $1 | jq -r .MINT_PASSWORD)
 #readonly MINT_MFA_TOKEN=$(echo -n $1 | jq -r .MINT_MFA_TOKEN)
@@ -27,6 +27,5 @@ readonly MINT_MFA_TOKEN=$(cat /run/build/secrets/secrets | jq --raw-output .MINT
     || (echo "Incorrect credentials" && exit 1)
 [[ -n "$MINT_MFA_TOKEN" ]] \
     || (echo "Incorrect credentials" && exit 1)
-set -x
 
 mintapi --headless --mfa-method soft-token --mfa-token "$MINT_MFA_TOKEN" "$MINT_USERNAME" "$MINT_PASSWORD" --credit-score
