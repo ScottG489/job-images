@@ -55,3 +55,11 @@ declare -r DOCKER_CONFIG_CONTENTS_BASE64=$2
   'git@github.com:ScottG489/job-images.git' \
   'echo' \
   'scottg489/echo-job:latest'
+
+
+./sleep/build.sh \
+  "$ID_RSA_CONTENTS_BASE64" \
+  "$DOCKER_CONFIG_CONTENTS_BASE64" \
+  'git@github.com:ScottG489/job-images.git' \
+  'sleep' \
+  'scottg489/sleep-job:latest'
