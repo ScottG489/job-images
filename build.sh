@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+
 declare -r ID_RSA_CONTENTS_BASE64=$1
 declare -r DOCKER_CONFIG_CONTENTS_BASE64=$2
 
