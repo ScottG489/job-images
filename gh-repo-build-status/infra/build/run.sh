@@ -7,6 +7,10 @@ set +x
 setup_credentials "$1"
 set -x
 
+# Start the docker daemon. This is necessary when using the sysbox-runc container runtime rather than mounting docker.sock
+dockerd > /var/log/dockerd.log 2>&1 &
+sleep 3
+
 # These are prefixed with an _ because they have global scope and the build_function lib may have overlap
 declare -r _PROJECT_NAME='job-images'
 declare -r _JOB_NAME='gh-repo-build-status'
