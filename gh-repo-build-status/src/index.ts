@@ -1,7 +1,7 @@
 import {Endpoints} from "@octokit/types";
 import {Octokit} from "@octokit/rest";
 import {readFileSync} from "fs";
-import {RepoBadgeInfo} from "./types";
+import {RepoBadgeInfo, RepoBuildInfo} from "./types";
 
 const secretsFile = "/run/build/secrets/secrets";
 const secrets = JSON.parse(readFileSync(secretsFile, 'utf8'));
@@ -17,6 +17,7 @@ type ListUserReposResponse = Endpoints["GET /user/repos"]["response"];
 
 type ListUserRepoActionsParameters = Endpoints["GET /repos/:owner/:repo/actions/workflows"]["parameters"];
 type ListUserRepoActionsResponse = Endpoints["GET /repos/:owner/:repo/actions/workflows"]["response"];
+type ListWorkflowRunsParams = Endpoints["GET /repos/:owner/:repo/actions/runs"]["parameters"];
 
 // TODO: This is a hack because I don't know how to get the full data type for data within the response
 interface SimplifiedUserRepoData {
@@ -24,22 +25,46 @@ interface SimplifiedUserRepoData {
     html_url: string;
 }
 
-async function getSimpleRepoData(): Promise<SimplifiedUserRepoData[]> {
+interface SimplifiedRepoWorkflow {
+    badge_url: string;
+}
+
+interface SimplifiedWorkflowRun {
+    conclusion: string;
+}
+
+async function listSimpleRepoData(): Promise<SimplifiedUserRepoData[]> {
     let userReposParams: ListUserReposParameters = {
         type: "owner",
         sort: "updated"
     }
-    const userRepos = await octokit.repos.listForAuthenticatedUser(userReposParams)
-    return userRepos.data
+    return await (await octokit.repos.listForAuthenticatedUser(userReposParams)).data
+}
+
+async function listSimpleRepoWorkflows(simpleRepoData: SimplifiedUserRepoData): Promise<SimplifiedRepoWorkflow[]> {
+    let userRepoActionParams: ListUserRepoActionsParameters = {
+        owner: username,
+        repo: simpleRepoData.name,
+        page: 1,
+        per_page: 1
+    }
+    return (await octokit.actions.listRepoWorkflows(userRepoActionParams)).data.workflows
+}
+
+async function listWorkflowRuns(badgeInfo: RepoBadgeInfo): Promise<SimplifiedWorkflowRun[]> {
+    let userRepoListWorkflowRunsParams: ListWorkflowRunsParams = {
+        owner: username,
+        repo: badgeInfo.repoName,
+        page: 1,
+        per_page: 1
+    }
+    return (await octokit.actions.listWorkflowRunsForRepo(userRepoListWorkflowRunsParams)).data.workflow_runs
 }
 
 async function getRepoBadgeInfo(simpleRepoData: SimplifiedUserRepoData): Promise<RepoBadgeInfo[]> {
-    let userRepoActionParams: ListUserRepoActionsParameters = {
-        owner: username,
-        repo: simpleRepoData.name
-    }
-    const repoWorkflows = await octokit.actions.listRepoWorkflows(userRepoActionParams)
-    return repoWorkflows.data.workflows
+    const repoWorkflows = await listSimpleRepoWorkflows(simpleRepoData)
+
+    return repoWorkflows
         .map(workflow => {
             return {
                 repoName: simpleRepoData.name,
@@ -49,16 +74,37 @@ async function getRepoBadgeInfo(simpleRepoData: SimplifiedUserRepoData): Promise
         })
 }
 
+async function getRepoBuildInfo(badgeInfo: RepoBadgeInfo): Promise<RepoBuildInfo[]> {
+    const workflowRuns: SimplifiedWorkflowRun[] = await listWorkflowRuns(badgeInfo)
+
+    return workflowRuns
+        .map(workflowRun => {
+            return {
+                repoName: badgeInfo.repoName,
+                repoUrl: badgeInfo.repoUrl,
+                badgeUrl: badgeInfo.badgeUrl,
+                workflowRunConclusion: workflowRun.conclusion
+            }
+        })
+}
+
 (async () => {
-    const repoNames: SimplifiedUserRepoData[] = await getSimpleRepoData();
-    const badgeUrls = (await Promise.all<RepoBadgeInfo[]>(repoNames.map(getRepoBadgeInfo)))
+    const simpleRepo: SimplifiedUserRepoData[] = await listSimpleRepoData();
+    const badgeInfos: RepoBadgeInfo[] = (await Promise.all<RepoBadgeInfo[]>(simpleRepo.map(getRepoBadgeInfo)))
         .filter(workflowBadges => {
             return Array.isArray(workflowBadges) && workflowBadges.length
         }).map(workflowBadges => {
             return workflowBadges[0]
         })
+    const buildInfos: RepoBuildInfo[] =
+        (await Promise.all<RepoBuildInfo[]>(badgeInfos.map(getRepoBuildInfo)))
+            .filter((workflowBuilds: RepoBuildInfo[]) => {
+                return Array.isArray(workflowBuilds) && workflowBuilds.length
+            }).map((workflowBuilds: RepoBuildInfo[]) => {
+            return workflowBuilds[0]
+        })
 
-    console.log(JSON.stringify(badgeUrls, null, 2));
+    console.log(JSON.stringify(buildInfos, null, 2));
 })().catch(e => {
     console.log("Fail")
     console.log(e);
