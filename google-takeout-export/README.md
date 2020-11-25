@@ -16,4 +16,4 @@ docker run -it --volume "$PWD/..:/opt/build/job-images" -v /var/run/docker.sock:
 2. Build the image locally
 3. Run the image with the path to your local repository mounted where the code would normally be cloned to
 
-Note that you'll need to comment out the `git clone` in the build otherwise it will fail since you've mounted a directory there
+Note that you'll need to comment out the `git clone` in the build otherwise it will fail since you've mounted a directory there 
