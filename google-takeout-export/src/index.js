@@ -243,7 +243,7 @@ puppeteer.launch({ headless: true, args: launchArgs}).then(async browser => {
 
     // TODO: This might not always be necessary? Maybe put it in a try/catch? Or check if elements exist/title of page
     // Type in password
-    // await page.type('input[type=password]', '***REMOVED***', {delay: 20})
+    // await page.type('input[type=password]', '', {delay: 20})
     // Submit password
     // page.click('div[data-primary-action-label="Next"] button')
 
