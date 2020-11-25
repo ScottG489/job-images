@@ -29,10 +29,10 @@ puppeteer.launch({ headless: true, args: launchArgs}).then(async browser => {
     const page = await browserCtx.newPage();
 
     // Set up luminati proxy
-    await page.authenticate({
-        username: '',
-        password: ''
-    });
+    // await page.authenticate({
+    //     username: '',
+    //     password: ''
+    // });
     // await page.goto('http://lumtest.com/myip.json');
     // await page.repl()
     // await browser.repl()
@@ -40,9 +40,8 @@ puppeteer.launch({ headless: true, args: launchArgs}).then(async browser => {
     // process.exit()
 
 
-    // TODO: URL shortcut
-    // https://takeout.google.com/takeout/custom/mymaps,local_actions,location_history
-    await page.goto('https://takeout.google.com/settings/takeout', {waitUntil: 'networkidle2'});
+    // See bottom of file for all takeout product id's
+    await page.goto('https://takeout.google.com/takeout/custom/tasks', {waitUntil: 'networkidle2'});
     // await page.waitFor(20000)
     console.log("FINISHED WAITING")
 
@@ -105,21 +104,6 @@ puppeteer.launch({ headless: true, args: launchArgs}).then(async browser => {
     await page.waitForTimeout(1000)
     page.click(mfaTokenButtonSelector)
     console.log('submitted mfa token')
-
-    console.log('waiting for deselect all button')
-    const deselectAllSelector = 'button[aria-label="Deselect all"]'
-    await page.waitForSelector(deselectAllSelector, {visible: true})
-    console.log('found deselect all button')
-    // Deselect all products
-    page.click(deselectAllSelector)
-    console.log('selected deselect all')
-
-    // Select Google Tasks product
-    const googleTasksSelector = 'div[data-id="tasks"] input[aria-label="Select Tasks"]'
-    await page.waitForSelector(googleTasksSelector, {visible: true})
-    await page.waitForTimeout(1000)
-    page.click(googleTasksSelector)
-    console.log('selected Google Tasks')
 
     // Go to next step of data export wizard
     console.log('waiting for submit next step')
@@ -274,3 +258,60 @@ puppeteer.launch({ headless: true, args: launchArgs}).then(async browser => {
     process.exit(1)
 });
 
+
+// List of all services and their corresponding id. The id's can be use like so:
+// https://takeout.google.com/takeout/custom/mymaps,local_actions,location_history
+
+// Android Device Configuration Service: checkin
+// Arts & Culture: arts_and_culture
+// Assistant Notes and Lists: assistant_notes_and_lists
+// Blogger: blogger
+// Calendar: calendar
+// Chrome: chrome
+// Classic Sites: classic_sites
+// Classroom: classroom
+// Cloud Print: cloud_print
+// Contacts: contacts
+// Crisis User Reports: crisis_ugc
+// Data Shared for Research: data_shared_for_research
+// Drive: drive
+// Fit: fit
+// Google Account: google_account
+// Google Fi: fi
+// Google Help Communities: support_content
+// Google My Business: my_business
+// Google Pay: google_pay
+// Google Photos: plus_photos
+// Google Play Books: books
+// Google Play Games Services: play_games_services
+// Google Play Movies & TV: play_movies
+// Google Play Music: play_music
+// Google Play Store: play
+// Google Shopping: shopping
+// Google Store: google_store
+// Google Translator Toolkit: gtrans
+// Google Workspace Marketplace: apps_marketplace
+// Groups: groups
+// Hangouts: chat
+// Home App: home_graph
+// Keep: keep
+// Location History: location_history
+// Mail: gmail
+// Maps: maps
+// Maps (your places): local_actions
+// My Activity: my_activity
+// My Maps: mymaps
+// News: news
+// Pinpoint: backlight
+// Posts on Google: posts_on_google
+// Profile: profile
+// Purchases & Reservations: my_orders
+// Question Hub: question_hub
+// Reminders: reminders
+// Saved: save
+// Search Contributions: search_ugc
+// Shopping Lists: shopping_list
+// Street View: streetview
+// Tasks: tasks
+// Voice: voice
+// YouTube and YouTube Music: youtube
