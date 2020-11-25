@@ -19,7 +19,7 @@ const mfaToken = secrets.MFA_TOKEN;
 // const launchArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--proxy-server=zproxy.lum-superproxy.io:22225']
 const launchArgs = ['--no-sandbox', '--disable-setuid-sandbox']
 puppeteer.launch({ headless: true, args: launchArgs}).then(async browser => {
-    console.log('launched')
+    console.log('Launching...')
 
     const browserCtx = await browser.createIncognitoBrowserContext();
     const page = await browserCtx.newPage();
@@ -41,7 +41,7 @@ puppeteer.launch({ headless: true, args: launchArgs}).then(async browser => {
     // See bottom of file for all takeout product id's
     await page.goto('https://takeout.google.com/takeout/custom/tasks', {waitUntil: 'networkidle2'});
     // await page.waitFor(20000)
-    console.log("FINISHED WAITING")
+    // console.log("FINISHED WAITING")
 
     console.log('----------Start login process----------')
     console.log('-----Submit email-----')
@@ -109,7 +109,8 @@ puppeteer.launch({ headless: true, args: launchArgs}).then(async browser => {
 
 
 async function setUpBrowserTunnel(browser) {
-    devtools.setAuthCredentials('foo', 'bar')
+    console.log("Creating dev tunnel for debugging")
+    // devtools.setAuthCredentials('foo', 'bar')
     const tunnel = await devtools.createTunnel(browser)
     console.log(tunnel.url)
 }
