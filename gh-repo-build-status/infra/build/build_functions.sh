@@ -10,8 +10,10 @@ setup_credentials() {
   local ID_RSA_CONTENTS
   local DOCKER_CONFIG_CONTENTS
 
-  readonly ID_RSA_CONTENTS=$(echo -n $1 | jq -r .ID_RSA | base64 --decode)
-  readonly DOCKER_CONFIG_CONTENTS=$(echo -n $1 | jq -r .DOCKER_CONFIG | base64 --decode)
+  readonly ID_RSA_CONTENTS=$(echo -n "$1" | jq -r .ID_RSA | base64 --decode)
+  readonly DOCKER_CONFIG_CONTENTS=$(echo -n "$1" | jq -r .DOCKER_CONFIG | base64 --decode)
+  [[ -n $ID_RSA_CONTENTS ]]
+  [[ -n $DOCKER_CONFIG_CONTENTS ]]
 
   printf -- "$ID_RSA_CONTENTS" >/root/.ssh/id_rsa
   printf -- "$DOCKER_CONFIG_CONTENTS" >/root/.docker/config.json
