@@ -7,7 +7,7 @@ readonly DOCKER_CONFIG=$2
 read -r -d '' JSON_BODY <<- EOM
   {
   "ID_RSA": "$ID_RSA",
-  "DOCKER_CONFIG": "$DOCKER_CONFIG",
+  "DOCKER_CONFIG": "$DOCKER_CONFIG"
   }
 EOM
 
