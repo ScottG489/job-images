@@ -13,10 +13,8 @@ const octokit = new Octokit({
 });
 
 type ListUserReposParameters = Endpoints["GET /user/repos"]["parameters"];
-type ListUserReposResponse = Endpoints["GET /user/repos"]["response"];
 
 type ListUserRepoActionsParameters = Endpoints["GET /repos/:owner/:repo/actions/workflows"]["parameters"];
-type ListUserRepoActionsResponse = Endpoints["GET /repos/:owner/:repo/actions/workflows"]["response"];
 type ListWorkflowRunsParams = Endpoints["GET /repos/:owner/:repo/actions/runs"]["parameters"];
 
 // TODO: This is a hack because I don't know how to get the full data type for data within the response
