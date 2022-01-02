@@ -74,3 +74,10 @@ declare -r DOCKER_CONFIG_CONTENTS_BASE64=$2
   'git@github.com:ScottG489/job-images.git' \
   'test-support' \
   'scottg489/test-support-job:latest'
+
+./docker-test-support/build.sh \
+  "$ID_RSA_CONTENTS_BASE64" \
+  "$DOCKER_CONFIG_CONTENTS_BASE64" \
+  'git@github.com:ScottG489/job-images.git' \
+  'docker-test-support' \
+  'scottg489/docker-test-support-job:latest'
