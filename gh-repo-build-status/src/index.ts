@@ -28,7 +28,7 @@ interface SimplifiedRepoWorkflow {
 }
 
 interface SimplifiedWorkflowRun {
-    conclusion: string;
+    conclusion: string | null;
 }
 
 async function listSimpleRepoData(): Promise<SimplifiedUserRepoData[]> {
@@ -81,7 +81,7 @@ async function getRepoBuildInfo(badgeInfo: RepoBadgeInfo): Promise<RepoBuildInfo
                 repoName: badgeInfo.repoName,
                 repoUrl: badgeInfo.repoUrl,
                 badgeUrl: badgeInfo.badgeUrl,
-                workflowRunConclusion: workflowRun.conclusion
+                workflowRunConclusion: workflowRun.conclusion === null ? "" : workflowRun.conclusion
             }
         })
 }
