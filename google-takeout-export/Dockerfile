@@ -1,6 +1,7 @@
 # Taken from https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-in-docker
 FROM node:16-slim
 
+WORKDIR /opt
 # Install latest chrome dev package and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
 # Note: this installs the necessary libs to make the bundled version of Chromium that Puppeteer
 # installs, work.
@@ -31,7 +32,7 @@ RUN npm i puppeteer \
     && groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
     && mkdir -p /home/pptruser/Downloads \
     && chown -R pptruser:pptruser /home/pptruser \
-    && chown -R pptruser:pptruser /node_modules
+    && chown -R pptruser:pptruser /opt/node_modules
 
 # Run everything after as non-privileged user.
 USER pptruser
@@ -40,4 +41,4 @@ COPY node_modules /node_modules
 COPY src /src
 
 #CMD ["google-chrome-stable"]
-CMD ["node", "src/index.js"]
+CMD ["node", "/src/index.js"]
