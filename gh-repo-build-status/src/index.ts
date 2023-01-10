@@ -4,7 +4,8 @@ import {readFileSync} from "fs";
 import {RepoBadgeInfo, RepoBuildInfo} from "./types";
 
 const secretsFile = "/run/build/secrets/secrets";
-const secrets = JSON.parse(readFileSync(secretsFile, 'utf8'));
+const userSecrets = process.argv[2]
+const secrets = userSecrets ? JSON.parse(userSecrets) : JSON.parse(readFileSync(secretsFile, 'utf8'));
 const username = secrets.USERNAME
 const githubToken = secrets.GITHUB_TOKEN
 

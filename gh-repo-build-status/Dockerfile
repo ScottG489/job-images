@@ -12,4 +12,4 @@ RUN npm install ts-node --global
 COPY node_modules /node_modules
 COPY src /src
 
-CMD ["ts-node", "src/index.ts"]
+ENTRYPOINT ["ts-node", "src/index.ts"]
