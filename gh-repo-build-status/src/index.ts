@@ -22,6 +22,7 @@ type ListWorkflowRunsParams = Endpoints["GET /repos/:owner/:repo/actions/runs"][
 interface SimplifiedUserRepoData {
     name: string;
     html_url: string;
+    fork: boolean;
 }
 
 interface SimplifiedRepoWorkflow {
@@ -88,7 +89,10 @@ async function getRepoBuildInfo(badgeInfo: RepoBadgeInfo): Promise<RepoBuildInfo
 }
 
 (async () => {
-    const simpleRepo: SimplifiedUserRepoData[] = await listSimpleRepoData();
+    const simpleRepo: SimplifiedUserRepoData[] = (await listSimpleRepoData())
+        .filter(repo => {
+            return !repo.fork;
+        });
     const badgeInfos: RepoBadgeInfo[] = (await Promise.all<RepoBadgeInfo[]>(simpleRepo.map(getRepoBadgeInfo)))
         .filter(workflowBadges => {
             return Array.isArray(workflowBadges) && workflowBadges.length
