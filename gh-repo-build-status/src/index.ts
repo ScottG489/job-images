@@ -89,11 +89,11 @@ async function getRepoBuildInfo(badgeInfo: RepoBadgeInfo): Promise<RepoBuildInfo
 }
 
 (async () => {
-    const simpleRepo: SimplifiedUserRepoData[] = (await listSimpleRepoData())
+    const simpleRepos: SimplifiedUserRepoData[] = (await listSimpleRepoData())
         .filter(repo => {
             return !repo.fork;
         });
-    const badgeInfos: RepoBadgeInfo[] = (await Promise.all<RepoBadgeInfo[]>(simpleRepo.map(getRepoBadgeInfo)))
+    const badgeInfos: RepoBadgeInfo[] = (await Promise.all<RepoBadgeInfo[]>(simpleRepos.map(getRepoBadgeInfo)))
         .filter(workflowBadges => {
             return Array.isArray(workflowBadges) && workflowBadges.length
         }).map(workflowBadges => {
