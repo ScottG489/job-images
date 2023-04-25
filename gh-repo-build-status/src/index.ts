@@ -36,7 +36,8 @@ interface SimplifiedWorkflowRun {
 async function listSimpleRepoData(): Promise<SimplifiedUserRepoData[]> {
     let userReposParams: ListUserReposParameters = {
         type: "owner",
-        sort: "updated"
+        sort: "updated",
+        per_page: 100
     }
     return await (await octokit.repos.listForAuthenticatedUser(userReposParams)).data
 }
