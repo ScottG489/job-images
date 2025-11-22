@@ -40,16 +40,16 @@ declare -r DOCKER_CONFIG_CONTENTS_BASE64=$2
   "$DOCKER_CONFIG_CONTENTS_BASE64"
 
 
-./mint-api-query/infra/build/build.sh \
-  "$ID_RSA_CONTENTS_BASE64" \
-  "$DOCKER_CONFIG_CONTENTS_BASE64" \
-  'git@github.com:ScottG489/job-images.git' \
-  'mint-api-query/infra/build' \
-  'scottg489/mint-api-query-job-build:latest'
-
-./mint-api-query/build.sh \
-  "$ID_RSA_CONTENTS_BASE64" \
-  "$DOCKER_CONFIG_CONTENTS_BASE64"
+#./mint-api-query/infra/build/build.sh \
+#  "$ID_RSA_CONTENTS_BASE64" \
+#  "$DOCKER_CONFIG_CONTENTS_BASE64" \
+#  'git@github.com:ScottG489/job-images.git' \
+#  'mint-api-query/infra/build' \
+#  'scottg489/mint-api-query-job-build:latest'
+#
+#./mint-api-query/build.sh \
+#  "$ID_RSA_CONTENTS_BASE64" \
+#  "$DOCKER_CONFIG_CONTENTS_BASE64"
 
 
 ./echo/build.sh \
