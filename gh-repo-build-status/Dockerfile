@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 RUN apt-get update && \
     DEBIAN_FRONTEND="noninteractive" \
@@ -10,6 +10,7 @@ RUN apt-get update && \
 RUN npm install ts-node --global
 
 COPY node_modules /node_modules
+COPY tsconfig.json /tsconfig.json
 COPY src /src
 
 ENTRYPOINT ["ts-node", "src/index.ts"]
